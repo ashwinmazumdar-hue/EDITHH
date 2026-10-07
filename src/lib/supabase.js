@@ -17,7 +17,15 @@ let problem = ''
 if (!url || !key) {
   problem = `Missing ${!url ? 'VITE_SUPABASE_URL' : ''}${!url && !key ? ' and ' : ''}${!key ? 'VITE_SUPABASE_ANON_KEY' : ''} in Vercel.`
 } else {
-  try { client = createClient(url, key) }
+  // Send every Supabase call through /api/sb on this site instead of straight to supabase.co
+  const proxyFetch = (input, init) => {
+    const target = typeof input === 'string' ? input : String(input.href || input.url || input)
+    if (target.startsWith(url)) {
+      return fetch(`/api/sb?p=${encodeURIComponent(target.slice(url.length))}`, init)
+    }
+    return fetch(input, init)
+  }
+  try { client = createClient(url, key, { global: { fetch: proxyFetch } }) }
   catch (e) { problem = `Supabase could not start: ${e.message}. URL being used: ${url}` }
 }
 
