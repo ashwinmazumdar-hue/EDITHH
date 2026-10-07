@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react'
-import { supabase, supabaseReady } from './lib/supabase'
+import { supabase, supabaseReady, supabaseProblem, supabaseUrlUsed } from './lib/supabase'
 import Auth from './Auth.jsx'
 import AdminPanel from './AdminPanel.jsx'
 import Dashboard from './Dashboard.jsx'
 
 const Setup = () => (
   <div style={{ minHeight: '100vh', background: '#020610', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-    <div style={{ maxWidth: 500, background: '#0a1628', border: '1px solid rgba(255,184,0,0.3)', borderRadius: 16, padding: 36, textAlign: 'center' }}>
-      <div style={{ fontSize: 38, marginBottom: 14 }}>⚙️</div>
-      <div style={{ fontFamily: 'Space Mono', fontSize: 16, fontWeight: 700, color: '#FFB800', letterSpacing: 2, marginBottom: 12 }}>SETUP REQUIRED</div>
-      <p style={{ fontFamily: 'Space Mono', fontSize: 11, color: 'rgba(255,255,255,0.4)', lineHeight: 1.8, marginBottom: 18 }}>
-        Set <span style={{ color: '#FFB800' }}>VITE_SUPABASE_URL</span> and <span style={{ color: '#FFB800' }}>VITE_SUPABASE_ANON_KEY</span> in Vercel → Settings → Environment Variables → Redeploy.
-      </p>
+    <div style={{ maxWidth: 560, background: '#0a1628', border: '1px solid rgba(255,184,0,0.3)', borderRadius: 16, padding: 36, textAlign: 'center' }}>
+      <div style={{ fontFamily: 'Space Mono', fontSize: 16, fontWeight: 700, color: '#FFB800', letterSpacing: 2, marginBottom: 14 }}>SETUP PROBLEM</div>
+      <p style={{ fontFamily: 'Space Mono', fontSize: 12, color: '#e2e8f0', lineHeight: 1.8, marginBottom: 14 }}>{supabaseProblem}</p>
+      {supabaseUrlUsed && <p style={{ fontFamily: 'Space Mono', fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>URL in use: {supabaseUrlUsed}</p>}
+      <p style={{ fontFamily: 'Space Mono', fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 14, lineHeight: 1.8 }}>Fix it in Vercel, Settings, Environment Variables, then Redeploy.</p>
     </div>
   </div>
 )
