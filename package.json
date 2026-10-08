@@ -1,7 +1,7 @@
 {
   "name": "edith-dashboard",
   "private": true,
-  "version": "2.0.0",
+  "version": "3.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,6 +16,7 @@
     "react-dom": "^18.3.1",
     "recharts": "^2.12.7",
     "vite": "^5.4.0",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "lottie-web": "^5.12.2"
   }
 }
