@@ -3,6 +3,7 @@ import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { Send, TrendingUp, TrendingDown, Zap, BarChart2, Target, Bot, Upload, Layers, Activity, LogOut, Shield, ChevronDown, ArrowLeft, CheckCircle, Menu, X, Search } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { supabase } from './lib/supabase'
+import { StarField, CursorFX, LoadingScreen, LottieLoader, CountUp, AnimatedLogo, TypingDots, Ticker, triggerWarp, tilt } from './fx.jsx'
 
 const PALETTE = ['#00D4FF', '#7B61FF', '#00FF88', '#FFB800', '#FF3366', '#FF6B35', '#A8FF3E']
 const TT = { backgroundColor: '#050d1f', border: '1px solid rgba(0,212,255,0.2)', borderRadius: 8, fontFamily: 'Space Mono', fontSize: 10 }
@@ -175,70 +176,15 @@ const joinByPlatformDate = (rows) => {
 }
 
 // ─── STAR FIELD BACKGROUND ───────────────────────────────────────
-const StarField = () => {
-  const ref = useRef(null)
-  const mouse = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 })
-
-  useEffect(() => {
-    const canvas = ref.current
-    const ctx = canvas.getContext('2d')
-    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight }
-    resize()
-    window.addEventListener('resize', resize)
-
-    const stars = Array.from({ length: 200 }, () => ({
-      x: Math.random() * canvas.width, y: Math.random() * canvas.height,
-      r: Math.random() * 1.2 + 0.1,
-      vx: (Math.random() - 0.5) * 0.1, vy: (Math.random() - 0.5) * 0.09,
-      op: Math.random() * 0.5 + 0.15, tw: Math.random() * Math.PI * 2,
-    }))
-
-    const onMouse = (e) => { mouse.current = { x: e.clientX, y: e.clientY } }
-    window.addEventListener('mousemove', onMouse)
-
-    let raf
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      const { x: mx, y: my } = mouse.current
-      stars.forEach(s => {
-        s.tw += 0.01
-        const dx = mx - s.x, dy = my - s.y, d = Math.sqrt(dx * dx + dy * dy)
-        if (d < 150) { s.x += dx * 0.0005; s.y += dy * 0.0005 }
-        s.x += s.vx; s.y += s.vy
-        if (s.x < 0) s.x = canvas.width; if (s.x > canvas.width) s.x = 0
-        if (s.y < 0) s.y = canvas.height; if (s.y > canvas.height) s.y = 0
-        ctx.beginPath()
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(200,225,255,${s.op * (0.6 + 0.4 * Math.sin(s.tw))})`
-        ctx.fill()
-      })
-      for (let i = 0; i < stars.length; i++) {
-        for (let j = i + 1; j < stars.length; j++) {
-          const dx = stars[i].x - stars[j].x, dy = stars[i].y - stars[j].y, d = Math.sqrt(dx * dx + dy * dy)
-          if (d < 80) {
-            ctx.beginPath()
-            ctx.moveTo(stars[i].x, stars[i].y); ctx.lineTo(stars[j].x, stars[j].y)
-            ctx.strokeStyle = `rgba(0,212,255,${0.1 * (1 - d / 80)})`
-            ctx.lineWidth = 0.3; ctx.stroke()
-          }
-        }
-      }
-      raf = requestAnimationFrame(draw)
-    }
-    draw()
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); window.removeEventListener('mousemove', onMouse) }
-  }, [])
-
-  return <canvas ref={ref} style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }} />
-}
-
 // ─── KPI CARD ──────────────────────────────────────────────────
-const KPICard = ({ title, value, color = '#00D4FF', big = false, sub = '' }) => (
-  <div style={{ background: 'rgba(255,255,255,0.025)', backdropFilter: 'blur(20px)', border: `1px solid ${color}22`, borderRadius: 12, padding: big ? 20 : 14, position: 'relative', overflow: 'hidden' }}>
-    <div style={{ position: 'absolute', top: 0, left: '10%', right: '10%', height: 1, background: `linear-gradient(90deg,transparent,${color}66,transparent)` }} />
-    <div style={{ fontFamily: 'Space Mono', fontSize: 7, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: big ? 10 : 8 }}>{title}</div>
-    <div style={{ fontFamily: 'Space Mono', fontWeight: 700, fontSize: big ? 26 : 16, color: '#fff', lineHeight: 1 }}>{value}</div>
-    {sub && <div style={{ fontFamily: 'Space Mono', fontSize: 8, color: `${color}88`, marginTop: 6 }}>{sub}</div>}
+const KPICard = ({ title, value, color = '#00D4FF', big = false, sub = '', delay = 0 }) => (
+  <div {...tilt(big ? 6 : 9)} className={`fx-card fx-rise ${big ? 'fx-border' : ''}`}
+    style={{ '--c': color, '--d': `${delay}ms`, background: 'rgba(255,255,255,0.025)', backdropFilter: 'blur(20px)', border: `1px solid ${color}22`, borderRadius: 12, padding: big ? 20 : 14 }}>
+    <div style={{ position: 'absolute', top: 0, left: '10%', right: '10%', height: 1, background: `linear-gradient(90deg,transparent,${color},transparent)`, opacity: .8 }} />
+    <div style={{ position: 'absolute', top: -40, right: -40, width: 110, height: 110, borderRadius: '50%', background: `radial-gradient(circle, ${color}22, transparent 70%)` }} className="fx-float" />
+    <div style={{ fontFamily: 'Space Mono', fontSize: 7, color: 'rgba(255,255,255,0.35)', letterSpacing: 2, marginBottom: big ? 10 : 8, position: 'relative' }}>{title}</div>
+    <div style={{ fontFamily: 'Space Mono', fontWeight: 700, fontSize: big ? 28 : 16, color: '#fff', lineHeight: 1, position: 'relative', textShadow: big ? `0 0 24px ${color}66` : 'none' }}><CountUp value={value} /></div>
+    {sub && <div style={{ fontFamily: 'Space Mono', fontSize: 8, color: color, opacity: .7, marginTop: 7, position: 'relative' }}>{sub}</div>}
   </div>
 )
 
@@ -280,6 +226,7 @@ export default function Dashboard({ user, profile, onSignOut, onAdmin }) {
 
   const fileRef = useRef(null)
   const isAdmin = profile?.role === 'admin'
+  useEffect(() => { triggerWarp() }, [tab])
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 3000) }
 
   // DB row <-> app row mapping
@@ -547,75 +494,47 @@ export default function Dashboard({ user, profile, onSignOut, onAdmin }) {
   const isEmpty = data.length === 0
 
   // ─── LOADING / INITIAL ────
-  if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#020610', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontFamily: 'Space Mono', fontSize: 11, color: '#00D4FF', letterSpacing: 3 }}>LOADING EDITH</div>
-        {loadCount > 0 && <div style={{ fontFamily: 'Space Mono', fontSize: 9, color: 'rgba(255,255,255,0.3)', marginTop: 10 }}>{loadCount.toLocaleString('en-IN')} rows loaded</div>}
-      </div>
-    </div>
-  )
+  if (loading) return <LoadingScreen label="LOADING EDITH" sub={loadCount > 0 ? `${loadCount.toLocaleString('en-IN')} rows loaded` : 'Connecting to database'} />
 
   return (
     <div style={{ display: 'flex', height: '100vh', background: '#020610', overflow: 'hidden', position: 'relative' }}>
       <StarField />
 
-      {/* Import progress overlay */}
-      {importing !== null && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(2,6,16,0.94)', backdropFilter: 'blur(10px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20 }}>
-          <div style={{ fontSize: 60 }}>🍽️</div>
-          <div style={{ fontFamily: 'Space Mono', fontSize: 13, color: '#00D4FF', letterSpacing: 4 }}>EDITH IS EATING…</div>
-          <div style={{ width: 320 }}>
-            <div style={{ height: 4, background: 'rgba(255,255,255,0.07)', borderRadius: 4, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${importing.pct}%`, background: 'linear-gradient(90deg, #00D4FF, #7B61FF)', transition: 'width 0.3s ease', boxShadow: '0 0 12px rgba(0,212,255,0.6)' }} />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontFamily: 'Space Mono', fontSize: 9, color: 'rgba(255,255,255,0.4)' }}>
-              <span>{importing.current} of {importing.total} files</span>
-              <span style={{ color: '#00D4FF' }}>{importing.pct}%</span>
-            </div>
-            {importing.name && <div style={{ fontFamily: 'Space Mono', fontSize: 8, color: 'rgba(255,255,255,0.25)', marginTop: 6, textAlign: 'center' }}>📄 {importing.name}</div>}
-            {importing.rows > 0 && <div style={{ fontFamily: 'Space Mono', fontSize: 9, color: '#00FF88', marginTop: 6, textAlign: 'center' }}>{importing.rows.toLocaleString('en-IN')} rows parsed</div>}
-          </div>
-        </div>
-      )}
+      <CursorFX />
+      <div className="fx-scanline" />
 
-      {/* AI loading overlay */}
-      {aiLoading && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9998, background: 'rgba(2,6,16,0.85)', backdropFilter: 'blur(6px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14 }}>
-          <div style={{ fontSize: 36 }}>🤔</div>
-          <div style={{ fontFamily: 'Space Mono', fontSize: 11, color: '#7B61FF', letterSpacing: 3, animation: 'pulse 1.4s ease infinite' }}>EDITH IS THINKING…</div>
-        </div>
-      )}
+      {/* Import progress overlay */}
+      {importing !== null && <LoadingScreen overlay label="EDITH IS EATING" sub="Reading and saving your files" progress={importing} />}
 
       {/* SIDEBAR */}
       <div style={{ width: 180, flexShrink: 0, background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', borderRight: '1px solid rgba(0,212,255,0.08)', display: 'flex', flexDirection: 'column', zIndex: 10, position: 'relative' }}>
         <div style={{ padding: '20px 16px', borderBottom: '1px solid rgba(0,212,255,0.06)' }}>
-          <div style={{ fontFamily: 'Space Mono', fontSize: 16, fontWeight: 700, color: '#00D4FF', letterSpacing: 5 }}>EDITH</div>
+          <AnimatedLogo size={17} spacing={5} />
           <div style={{ fontFamily: 'Space Mono', fontSize: 7, color: 'rgba(255,255,255,0.2)', letterSpacing: 3, marginTop: 2 }}>INTELLIGENCE</div>
         </div>
         <nav style={{ flex: 1, padding: '12px 8px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {NAV.map(({ id, label, Icon }) => {
+          {NAV.map(({ id, label, Icon }, ni) => {
             const active = tab === id
             return (
-              <button key={id} onClick={() => { setTab(id); setDrillEntity(null) }} style={{
+              <button key={id} className="fx-nav fx-slideL" onClick={() => { setTab(id); setDrillEntity(null) }} style={{ '--d': `${150 + ni * 70}ms`, boxShadow: active ? 'inset 0 0 18px rgba(0,212,255,0.12), 0 0 16px -6px #00D4FF' : 'none',
                 display: 'flex', alignItems: 'center', gap: 9, padding: '9px 11px', borderRadius: 8, border: 'none', cursor: 'pointer',
                 background: active ? 'rgba(0,212,255,0.1)' : 'transparent',
                 borderLeft: `2px solid ${active ? '#00D4FF' : 'transparent'}`,
                 color: active ? '#00D4FF' : 'rgba(255,255,255,0.3)',
                 fontFamily: 'Syne', fontWeight: 600, fontSize: 11, transition: 'all .15s',
               }}>
-                <Icon size={13} /> {label}
+                <Icon size={13} style={{ filter: active ? 'drop-shadow(0 0 6px #00D4FF)' : 'none', transition: 'filter .3s' }} /> {label}
               </button>
             )
           })}
         </nav>
         <div style={{ padding: '14px 16px', borderTop: '1px solid rgba(0,212,255,0.06)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
-            <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#00FF88', boxShadow: '0 0 6px #00FF88' }} />
+            <div className="fx-pulse" style={{ width: 6, height: 6, borderRadius: '50%', background: '#00FF88', boxShadow: '0 0 10px #00FF88' }} />
             <span style={{ fontFamily: 'Space Mono', fontSize: 8, color: '#00FF88', letterSpacing: 1 }}>LIVE</span>
           </div>
-          <div style={{ fontFamily: 'Space Mono', fontSize: 8, color: 'rgba(255,255,255,0.2)' }}>{data.length.toLocaleString('en-IN')} raw rows</div>
-          <div style={{ fontFamily: 'Space Mono', fontSize: 8, color: 'rgba(255,255,255,0.2)', marginTop: 2 }}>{joined.length.toLocaleString('en-IN')} joined</div>
+          <div style={{ fontFamily: 'Space Mono', fontSize: 8, color: 'rgba(255,255,255,0.3)' }}><CountUp value={data.length.toLocaleString('en-IN')} /> rows</div>
+          <div style={{ fontFamily: 'Space Mono', fontSize: 8, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}><CountUp value={joined.length.toLocaleString('en-IN')} /> joined</div>
         </div>
       </div>
 
@@ -624,7 +543,7 @@ export default function Dashboard({ user, profile, onSignOut, onAdmin }) {
         {/* Top bar */}
         <div style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(0,212,255,0.06)', padding: '13px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           <div>
-            <h1 style={{ fontFamily: 'Syne', fontWeight: 800, fontSize: 16, color: '#fff', letterSpacing: .5 }}>Campaign Intelligence</h1>
+            <h1 className="fx-slideL" style={{ fontFamily: 'Syne', fontWeight: 800, fontSize: 16, color: '#fff', letterSpacing: .5 }}>Campaign <span className="fx-text-shimmer">Intelligence</span></h1>
             <p style={{ fontFamily: 'Space Mono', fontSize: 7, color: 'rgba(255,255,255,0.25)', marginTop: 2, letterSpacing: 2 }}>
               EDITH · {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()}
             </p>
@@ -688,18 +607,20 @@ export default function Dashboard({ user, profile, onSignOut, onAdmin }) {
             <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.08)' }} />
             <span style={{ fontFamily: 'Space Mono', fontSize: 8, color: 'rgba(255,255,255,0.25)', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</span>
             {onAdmin && (
-              <button onClick={onAdmin} style={{ background: 'none', border: '1px solid rgba(255,184,0,0.3)', borderRadius: 8, padding: '6px 11px', color: '#FFB800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'Space Mono', fontSize: 9 }}>
+              <button className="fx-btn" onClick={onAdmin} style={{ '--c': '#FFB800', background: 'none', border: '1px solid rgba(255,184,0,0.3)', borderRadius: 8, padding: '6px 11px', color: '#FFB800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'Space Mono', fontSize: 9 }}>
                 <Shield size={11} /> Admin
               </button>
             )}
-            <button onClick={onSignOut} style={{ background: 'none', border: '1px solid rgba(255,51,102,0.3)', borderRadius: 8, padding: '6px 11px', color: '#FF3366', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'Space Mono', fontSize: 9 }}>
+            <button className="fx-btn" onClick={onSignOut} style={{ '--c': '#FF3366', background: 'none', border: '1px solid rgba(255,51,102,0.3)', borderRadius: 8, padding: '6px 11px', color: '#FF3366', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'Space Mono', fontSize: 9 }}>
               <LogOut size={11} /> Out
             </button>
           </div>
         </div>
 
+        <Ticker items={platformStats.slice(0, 12).map((p, i) => ({ label: p.name, color: PALETTE[i % PALETTE.length], text: `Spend Rs${(p.spend / 1e5).toFixed(1)}L  ·  CPS ${p.sessions > 0 ? 'Rs' + p.cps : 'NA'}  ·  CTR ${p.ctr}%  ·  CPM Rs${p.cpm}` }))} />
+
         {/* CONTENT */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
+        <div key={tab} className="fx-page" style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
           {loadError && (
             <div style={{ marginBottom: 16, padding: '12px 16px', background: 'rgba(255,51,102,0.08)', border: '1px solid rgba(255,51,102,0.3)', borderRadius: 10, fontFamily: 'Space Mono', fontSize: 10, color: '#FF3366' }}>
               Could not load data from the database: {loadError}. Check that supabase_setup.sql has been run.
@@ -709,26 +630,26 @@ export default function Dashboard({ user, profile, onSignOut, onAdmin }) {
           {tab === 'overview' && (
             isEmpty ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '65vh', gap: 20, textAlign: 'center' }}>
-                <div style={{ fontSize: 60 }}>🍽️</div>
-                <div style={{ fontFamily: 'Syne', fontWeight: 800, fontSize: 24, color: '#fff' }}>EDITH is hungry</div>
+                <div className="fx-float"><LottieLoader size={200} /></div>
+                <div className="fx-rise" style={{ fontFamily: 'Syne', fontWeight: 800, fontSize: 26, color: '#fff', '--d': '150ms' }}>EDITH is <span className="fx-text-shimmer">hungry</span></div>
                 <div style={{ fontFamily: 'Space Mono', fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Feed EDITH your data</div>
-                {isAdmin && <button onClick={() => setTab('import')} style={{ marginTop: 8, padding: '11px 26px', background: 'linear-gradient(135deg,#00D4FF,#0099BB)', border: 'none', borderRadius: 10, color: '#020610', fontFamily: 'Syne', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>🍖 Feed EDITH</button>}
+                {isAdmin && <button className="fx-btn fx-shine fx-pop" onClick={() => setTab('import')} style={{ '--d': '350ms', marginTop: 8, padding: '11px 26px', background: 'linear-gradient(135deg,#00D4FF,#0099BB)', border: 'none', borderRadius: 10, color: '#020610', fontFamily: 'Syne', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>🍖 Feed EDITH</button>}
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 {/* KPIs */}
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 1fr', gap: 12 }}>
-                  <KPICard title="SESSIONS ★" value={kpis.sessions} color="#00FF88" big sub="Total sessions" />
-                  <KPICard title="CPS ★" value={kpis.cps} color="#00D4FF" big sub="Cost per session" />
-                  <KPICard title="SPEND" value={kpis.spendCr} color="#7B61FF" />
-                  <KPICard title="CPM" value={kpis.cpm} color="#FFB800" />
-                  <KPICard title="CTR" value={kpis.ctr} color="#A8FF3E" />
-                  <KPICard title="INSTALLS" value={kpis.installs} color="#FF6B35" />
-                  <KPICard title="PURCHASES" value={kpis.purchase} color="#FF3366" />
+                  <KPICard delay={0} title="SESSIONS ★" value={kpis.sessions} color="#00FF88" big sub="Total sessions" />
+                  <KPICard delay={80} title="CPS ★" value={kpis.cps} color="#00D4FF" big sub="Cost per session" />
+                  <KPICard delay={160} title="SPEND" value={kpis.spendCr} color="#7B61FF" />
+                  <KPICard delay={240} title="CPM" value={kpis.cpm} color="#FFB800" />
+                  <KPICard delay={320} title="CTR" value={kpis.ctr} color="#A8FF3E" />
+                  <KPICard delay={400} title="INSTALLS" value={kpis.installs} color="#FF6B35" />
+                  <KPICard delay={480} title="PURCHASES" value={kpis.purchase} color="#FF3366" />
                 </div>
 
                 {/* Trend chart with metric selector */}
-                <div style={{ background: 'rgba(255,255,255,0.025)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0,212,255,0.1)', borderRadius: 12, padding: 18 }}>
+                <div className="fx-rise" style={{ '--d': '550ms', background: 'rgba(255,255,255,0.025)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0,212,255,0.1)', borderRadius: 12, padding: 18, position: 'relative', overflow: 'hidden' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
                     <div style={{ fontFamily: 'Space Mono', fontSize: 9, color: 'rgba(255,255,255,0.3)', letterSpacing: 2 }}>METRIC TREND</div>
                     <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
@@ -741,7 +662,7 @@ export default function Dashboard({ user, profile, onSignOut, onAdmin }) {
                         { k: 'sessions', label: 'Sessions', c: '#A8FF3E' },
                         { k: 'installs', label: 'Installs', c: '#FF3366' },
                       ].map(m => (
-                        <button key={m.k} onClick={() => setTrendMetric(m.k)} style={{
+                        <button key={m.k} className="fx-btn" onClick={() => setTrendMetric(m.k)} style={{ '--c': m.c, boxShadow: trendMetric === m.k ? `0 0 14px -4px ${m.c}` : 'none',
                           padding: '4px 11px', borderRadius: 20,
                           border: `1px solid ${trendMetric === m.k ? m.c : 'rgba(255,255,255,0.1)'}`,
                           background: trendMetric === m.k ? `${m.c}22` : 'transparent',
@@ -767,7 +688,7 @@ export default function Dashboard({ user, profile, onSignOut, onAdmin }) {
                           <XAxis dataKey="date" stroke="rgba(255,255,255,0.15)" tick={{ fontFamily: 'Space Mono', fontSize: 8 }} />
                           <YAxis stroke="rgba(255,255,255,0.15)" tick={{ fontFamily: 'Space Mono', fontSize: 8 }} />
                           <Tooltip contentStyle={TT} />
-                          <Area type="monotone" dataKey={trendMetric} stroke={c} fill="url(#grad)" strokeWidth={2.5} dot={false} />
+                          <Area key={trendMetric} type="monotone" dataKey={trendMetric} stroke={c} fill="url(#grad)" strokeWidth={2.5} dot={false} activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2, fill: c, style: { filter: `drop-shadow(0 0 8px ${c})` } }} animationDuration={1600} animationEasing="ease-out" style={{ filter: `drop-shadow(0 0 6px ${c}88)` }} />
                         </AreaChart>
                       </ResponsiveContainer>
                     )
@@ -775,16 +696,16 @@ export default function Dashboard({ user, profile, onSignOut, onAdmin }) {
                 </div>
 
                 {/* Platform spend */}
-                <div style={{ background: 'rgba(255,255,255,0.025)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0,255,136,0.1)', borderRadius: 12, padding: 18 }}>
+                <div className="fx-rise" style={{ '--d': '700ms', background: 'rgba(255,255,255,0.025)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0,255,136,0.1)', borderRadius: 12, padding: 18 }}>
                   <div style={{ fontFamily: 'Space Mono', fontSize: 9, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: 14 }}>PLATFORM SPEND BREAKDOWN</div>
                   {platformStats.slice(0, 10).map((p, i) => (
-                    <div key={p.name} style={{ marginBottom: 10 }}>
+                    <div key={p.name} className="fx-slideL" style={{ marginBottom: 10, '--d': `${800 + i * 70}ms` }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                         <span style={{ fontFamily: 'Space Mono', fontSize: 10, color: PALETTE[i % PALETTE.length] }}>{p.name}</span>
                         <span style={{ fontFamily: 'Space Mono', fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>₹{(p.spend / 1e5).toFixed(1)}L · CPS ₹{p.cps}</span>
                       </div>
                       <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${(p.spend / platformStats[0].spend * 100).toFixed(0)}%`, background: `linear-gradient(90deg, ${PALETTE[i % PALETTE.length]}, ${PALETTE[i % PALETTE.length]}88)`, borderRadius: 2, transition: 'width 1s ease' }} />
+                        <div style={{ height: '100%', width: `${(p.spend / platformStats[0].spend * 100).toFixed(0)}%`, background: `linear-gradient(90deg, ${PALETTE[i % PALETTE.length]}, ${PALETTE[i % PALETTE.length]}88)`, borderRadius: 2, '--d': `${900 + i * 90}ms`, boxShadow: `0 0 10px ${PALETTE[i % PALETTE.length]}` }} className="fx-grow" />
                       </div>
                     </div>
                   ))}
@@ -799,7 +720,7 @@ export default function Dashboard({ user, profile, onSignOut, onAdmin }) {
               {platformStats.map((p, i) => {
                 const c = PALETTE[i % PALETTE.length]
                 return (
-                  <div key={p.name} style={{ background: 'rgba(255,255,255,0.025)', backdropFilter: 'blur(20px)', border: `1px solid ${c}22`, borderRadius: 12, padding: 18, position: 'relative', overflow: 'hidden' }}>
+                  <div key={p.name} {...tilt(8)} className="fx-card fx-rise" style={{ '--c': c, '--d': `${i * 70}ms`, background: 'rgba(255,255,255,0.025)', backdropFilter: 'blur(20px)', border: `1px solid ${c}22`, borderRadius: 12, padding: 18 }}>
                     <div style={{ position: 'absolute', top: 0, left: '10%', right: '10%', height: 1, background: `linear-gradient(90deg,transparent,${c}66,transparent)` }} />
                     <div style={{ fontFamily: 'Space Mono', fontSize: 9, color: c, letterSpacing: 2, marginBottom: 12 }}>{p.name.toUpperCase()}</div>
                     {[
@@ -831,7 +752,7 @@ export default function Dashboard({ user, profile, onSignOut, onAdmin }) {
                   const c = PALETTE[i % PALETTE.length]
                   const active = drillEntity === p.name
                   return (
-                    <button key={p.name} onClick={() => setDrillEntity(active ? null : p.name)} style={{
+                    <button key={p.name} className="fx-btn fx-slideL" onClick={() => setDrillEntity(active ? null : p.name)} style={{ '--c': c, '--d': `${i * 50}ms`,
                       display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', borderRadius: 10,
                       border: `1px solid ${active ? c + '55' : 'rgba(255,255,255,0.06)'}`,
                       background: active ? `${c}12` : 'rgba(255,255,255,0.02)',
@@ -871,7 +792,7 @@ export default function Dashboard({ user, profile, onSignOut, onAdmin }) {
                       <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Space Mono', fontSize: 9 }}>
                         <thead><tr>{['Date', 'Status', 'Spend', 'Impr', 'CTR%', 'CPM', 'Sessions', 'CPS', 'Installs'].map(h => (<th key={h} style={{ textAlign: 'left', padding: '7px 10px', color: c, borderBottom: `1px solid ${c}22`, letterSpacing: 1 }}>{h}</th>))}</tr></thead>
                         <tbody>{rows.map((r, idx) => (
-                          <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                          <tr key={idx} className="fx-row" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', '--d': `${Math.min(idx, 30) * 25}ms` }}>
                             <td style={{ padding: '6px 10px', color: 'rgba(255,255,255,0.5)' }}>{r.Date}</td>
                             <td style={{ padding: '6px 10px' }}><span style={{ fontSize: 8, padding: '2px 7px', borderRadius: 10, background: r.status === 'matched' ? 'rgba(0,255,136,0.15)' : r.status === 'raw_only' ? 'rgba(255,184,0,0.15)' : 'rgba(123,97,255,0.15)', color: r.status === 'matched' ? '#00FF88' : r.status === 'raw_only' ? '#FFB800' : '#7B61FF' }}>{r.status === 'matched' ? '✓' : r.status === 'raw_only' ? 'media' : 'app'}</span></td>
                             <td style={{ padding: '6px 10px', color: '#00FF88' }}>₹{(r.Spends / 1e3).toFixed(0)}K</td>
@@ -893,7 +814,7 @@ export default function Dashboard({ user, profile, onSignOut, onAdmin }) {
 
           {/* EDITH AI */}
           {tab === 'ai' && (
-            <div style={{ maxWidth: 800, display: 'flex', flexDirection: 'column', gap: 14, height: 'calc(100vh - 130px)' }}>
+            <div className="fx-rise" style={{ maxWidth: 800, display: 'flex', flexDirection: 'column', gap: 14, height: 'calc(100vh - 160px)' }}>
               <div style={{ flex: 1, background: 'rgba(255,255,255,0.025)', backdropFilter: 'blur(20px)', border: '1px solid rgba(123,97,255,0.15)', borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                   <div style={{ fontFamily: 'Space Mono', fontSize: 9, color: '#7B61FF', letterSpacing: 2 }}>EDITH - AI ANALYST</div>
@@ -955,7 +876,7 @@ export default function Dashboard({ user, profile, onSignOut, onAdmin }) {
                 {/* Messages */}
                 <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 12, paddingRight: 4 }}>
                   {aiMessages.map((m, i) => (
-                    <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                    <div key={i} className={m.role === 'user' ? 'fx-slideR' : 'fx-slideL'} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
                       <div style={{
                         maxWidth: '78%', padding: '11px 15px', borderRadius: 12,
                         background: m.isError ? 'rgba(255,51,102,0.08)' : m.role === 'user' ? 'rgba(0,212,255,0.1)' : 'rgba(255,255,255,0.03)',
@@ -975,19 +896,26 @@ export default function Dashboard({ user, profile, onSignOut, onAdmin }) {
                       </div>
                     </div>
                   ))}
+                  {aiLoading && (
+                    <div className="fx-slideL" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 14px', alignSelf: 'flex-start', background: 'rgba(123,97,255,0.06)', border: '1px solid rgba(123,97,255,0.25)', borderRadius: 12 }}>
+                      <LottieLoader size={44} />
+                      <span style={{ fontFamily: 'Space Mono', fontSize: 10, color: '#7B61FF', letterSpacing: 2 }}>EDITH IS THINKING</span>
+                      <TypingDots />
+                    </div>
+                  )}
                   <div ref={chatRef} />
                 </div>
 
                 {/* Quick suggestions */}
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
-                  {['Which platform has the best CPS?', 'Compare CTR across platforms', 'What is my total spend YTD?', 'Top 3 platforms by sessions'].map(q => (
-                    <button key={q} onClick={() => setAiQuery(q)} style={{ padding: '4px 11px', background: 'transparent', border: '1px solid rgba(123,97,255,0.3)', borderRadius: 20, color: 'rgba(255,255,255,0.4)', fontFamily: 'Space Mono', fontSize: 9, cursor: 'pointer' }}>{q}</button>
+                  {['Which platform has the best CPS?', 'Compare CTR across platforms', 'What is my total spend YTD?', 'Top 3 platforms by sessions'].map((q, qi) => (
+                    <button key={q} className="fx-btn fx-pop" onClick={() => setAiQuery(q)} style={{ '--c': '#7B61FF', '--d': `${qi * 80}ms`, padding: '4px 11px', background: 'transparent', border: '1px solid rgba(123,97,255,0.3)', borderRadius: 20, color: 'rgba(255,255,255,0.4)', fontFamily: 'Space Mono', fontSize: 9, cursor: 'pointer' }}>{q}</button>
                   ))}
                 </div>
 
                 <div style={{ display: 'flex', gap: 10 }}>
                   <input value={aiQuery} onChange={e => setAiQuery(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAskAI()} placeholder="Ask EDITH…" style={{ flex: 1, padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: '#e2e8f0', fontFamily: 'Space Mono', fontSize: 11, outline: 'none' }} />
-                  <button onClick={handleAskAI} disabled={aiLoading} style={{ padding: '10px 18px', background: aiLoading ? 'rgba(123,97,255,0.2)' : 'linear-gradient(135deg,#7B61FF,#5040CC)', border: 'none', borderRadius: 10, cursor: aiLoading ? 'not-allowed' : 'pointer', color: '#fff', display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'Syne', fontWeight: 700, fontSize: 11 }}>
+                  <button className="fx-btn fx-shine" onClick={handleAskAI} disabled={aiLoading} style={{ '--c': '#7B61FF', padding: '10px 18px', background: aiLoading ? 'rgba(123,97,255,0.2)' : 'linear-gradient(135deg,#7B61FF,#5040CC)', border: 'none', borderRadius: 10, cursor: aiLoading ? 'not-allowed' : 'pointer', color: '#fff', display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'Syne', fontWeight: 700, fontSize: 11 }}>
                     <Send size={12} /> Send
                   </button>
                 </div>
@@ -1006,8 +934,8 @@ export default function Dashboard({ user, profile, onSignOut, onAdmin }) {
                 </div>
               </div>
             ) : (
-              <div style={{ maxWidth: 760, display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {/* Match report */}
+              <div className="fx-rise" style={{ maxWidth: 760, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {/* Match report (animated) */}
                 {joined.length > 0 && (
                   <div style={{ background: 'rgba(255,255,255,0.025)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0,255,136,0.1)', borderRadius: 12, padding: 18 }}>
                     <div style={{ fontFamily: 'Space Mono', fontSize: 9, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: 12 }}>JOIN QUALITY REPORT</div>
@@ -1095,8 +1023,8 @@ export default function Dashboard({ user, profile, onSignOut, onAdmin }) {
                     onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor = '#00D4FF' }}
                     onDragLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,212,255,0.15)' }}
                     onDrop={e => { e.preventDefault(); e.currentTarget.style.borderColor = 'rgba(0,212,255,0.15)'; handleUpload(e.dataTransfer.files) }}
-                    style={{ border: '2px dashed rgba(0,212,255,0.15)', borderRadius: 12, padding: '32px 20px', textAlign: 'center', cursor: 'pointer', transition: 'border-color .2s' }}>
-                    <div style={{ fontSize: 28, marginBottom: 8 }}>📁</div>
+                    className="fx-card" style={{ '--c': '#00D4FF', border: '2px dashed rgba(0,212,255,0.25)', borderRadius: 12, padding: '36px 20px', textAlign: 'center', cursor: 'pointer' }}>
+                    <div className="fx-float" style={{ fontSize: 34, marginBottom: 8 }}>📁</div>
                     <div style={{ fontFamily: 'Syne', fontWeight: 700, fontSize: 13, color: '#e2e8f0', marginBottom: 4 }}>Drop XLSX files or click to browse</div>
                     <div style={{ fontFamily: 'Space Mono', fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>All files merged · Raw Dump + AppsFlyer auto-detected</div>
                   </div>
@@ -1125,7 +1053,7 @@ export default function Dashboard({ user, profile, onSignOut, onAdmin }) {
 
       {/* Toast */}
       {toast && (
-        <div style={{ position: 'fixed', bottom: 24, right: 24, padding: '12px 20px', background: 'rgba(2,6,16,0.95)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0,212,255,0.3)', borderRadius: 10, fontFamily: 'Space Mono', fontSize: 11, color: '#00D4FF', boxShadow: '0 0 30px rgba(0,212,255,0.15)', zIndex: 9999 }}>{toast}</div>
+        <div key={toast} style={{ animation: 'fxToast .45s cubic-bezier(.34,1.56,.64,1) both', position: 'fixed', bottom: 24, right: 24, padding: '12px 20px', background: 'rgba(2,6,16,0.95)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0,212,255,0.3)', borderRadius: 10, fontFamily: 'Space Mono', fontSize: 11, color: '#00D4FF', boxShadow: '0 0 30px rgba(0,212,255,0.15)', zIndex: 9999 }}>{toast}</div>
       )}
     </div>
   )

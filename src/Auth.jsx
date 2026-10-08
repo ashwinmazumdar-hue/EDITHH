@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { supabase } from './lib/supabase'
+import { StarField, CursorFX, AnimatedLogo } from './fx.jsx'
 
 export default function Auth() {
   const [mode, setMode] = useState('login')
@@ -42,25 +43,27 @@ export default function Auth() {
   }
 
   return (
-    <div style={{
+    <div style={{ position: 'relative',
       minHeight: '100vh', background: '#020610',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       backgroundImage: 'linear-gradient(rgba(0,212,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.04) 1px,transparent 1px)',
       backgroundSize: '40px 40px',
     }}>
-      <div style={{
+      <StarField density={1.2} />
+      <CursorFX />
+      <div className="fx-rise fx-border" style={{ '--c': '#00D4FF', position: 'relative', zIndex: 2, backdropFilter: 'blur(18px)',
         width: 400, background: 'linear-gradient(135deg,#0a1628,#040b14)',
         border: '1px solid rgba(0,212,255,0.15)', borderRadius: 16,
         padding: '44px 36px', boxShadow: '0 0 60px rgba(0,212,255,0.06)',
       }}>
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ fontFamily: 'Space Mono', fontSize: 26, fontWeight: 700, color: '#00D4FF', letterSpacing: 5 }}>EDITH</div>
+          <AnimatedLogo size={30} spacing={7} />
           <div style={{ fontFamily: 'Space Mono', fontSize: 9, color: 'rgba(255,255,255,0.2)', letterSpacing: 3, marginTop: 4 }}>CAMPAIGN INTELLIGENCE</div>
         </div>
 
         <div style={{ display: 'flex', background: '#060f1e', borderRadius: 8, padding: 3, marginBottom: 24, border: '1px solid rgba(0,212,255,0.1)' }}>
           {['login', 'signup'].map(m => (
-            <button key={m} onClick={() => { setMode(m); setError(''); setSuccess('') }} style={{
+            <button key={m} className="fx-btn" onClick={() => { setMode(m); setError(''); setSuccess('') }} style={{ transition: 'all .3s',
               flex: 1, padding: '8px 0', border: 'none', cursor: 'pointer', borderRadius: 6,
               background: mode === m ? 'rgba(0,212,255,0.12)' : 'transparent',
               color: mode === m ? '#00D4FF' : 'rgba(255,255,255,0.3)',
@@ -87,7 +90,7 @@ export default function Auth() {
         {error && <div style={{ marginTop: 14, padding: '10px 14px', background: 'rgba(255,51,102,0.08)', border: '1px solid rgba(255,51,102,0.3)', borderRadius: 8, fontFamily: 'Space Mono', fontSize: 10, color: '#FF3366' }}>{error}</div>}
         {success && <div style={{ marginTop: 14, padding: '10px 14px', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.3)', borderRadius: 8, fontFamily: 'Space Mono', fontSize: 10, color: '#00FF88' }}>{success}</div>}
 
-        <button onClick={submit} disabled={loading} style={{
+        <button className="fx-btn fx-shine" onClick={submit} disabled={loading} style={{ '--c': '#00D4FF',
           width: '100%', marginTop: 22, padding: '13px 0',
           background: loading ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg,#00D4FF,#0099BB)',
           border: 'none', borderRadius: 8, color: '#020610',

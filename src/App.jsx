@@ -3,6 +3,7 @@ import { supabase, supabaseReady, supabaseProblem, supabaseUrlUsed } from './lib
 import Auth from './Auth.jsx'
 import AdminPanel from './AdminPanel.jsx'
 import Dashboard from './Dashboard.jsx'
+import { LoadingScreen } from './fx.jsx'
 
 const Setup = () => (
   <div style={{ minHeight: '100vh', background: '#020610', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
@@ -46,11 +47,7 @@ export default function App() {
 
   if (!supabaseReady) return <Setup />
 
-  if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#020610', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ fontFamily: 'Space Mono', fontSize: 11, color: '#00D4FF', letterSpacing: 3 }}>LOADING EDITH…</div>
-    </div>
-  )
+  if (loading) return <LoadingScreen label="WAKING UP EDITH" sub="Checking your session" />
 
   if (!session) return <Auth />
 
